@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<body>
+      <div class="jumbotron">
+        <h1>WebSocketPlayground</h1>
+        <p>This is a web app that let's you create a "session" which you can share with other friends and interact with each other. Click "Create Session" to start and then copy the link it provides you to your friends to be able to hangout in the same session</p>
+        <p>The WebSocket server is written in Go from scratch and the web client is written in Javascript/JQuery. You can find the source code here: <a href="https://github.com/JohnnyJohnAndTheFunkyBunch/WebSocketPlayground">WebSocketPlayground</a></p>
+        <p>
+          <a id="createsession" class="btn btn-lg btn-primary" href="#" role="button">Create Session &raquo;</a>
+        </p>
+      </div>
+</body>
+<script>
+    $(document).ready(function() {
+       $('#createsession').attr("href","session.php?s="+makeid());
+    });
+
+function makeid()
+{
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < 15; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+</script>
+</html>

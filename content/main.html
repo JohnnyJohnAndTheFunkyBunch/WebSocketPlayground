@@ -1,0 +1,18 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Demos</h3>
+  </div>
+  <div class="panel-body">
+      <a href='#' class="content-button" id="youtube">Youtube Sync</a>
+  </div>
+  <div class="panel-body">
+      <a href='#'>FileSharer</a>
+  </div>
+</div>
+
+<script>
+    $('.content-button').click(function() {
+        var msg = '{"P":'+playerId+',"T":5,"C":"'+this.id+'"}';
+        s.send(msg);
+    });
+</script>

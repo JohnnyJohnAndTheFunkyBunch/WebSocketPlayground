@@ -1,0 +1,88 @@
+    .connection {
+        font-size: 20px;
+        padding: 5px;
+        width: 200px;
+        text-align: center;
+        position: fixed;
+        left: 50%;
+        margin-left: -100px;
+    }
+    .ping {
+        font-size: 20px;
+        padding: 5px;
+        width: 200px;
+        text-align: center;
+        left: 50%;
+        margin-left: -100px;
+    }
+    .content {
+        height: 600px;
+        width: 900px;
+        background-color: #F8F8F8;
+        border-width : 1px;
+        border-style: solid;
+        border-color: black;
+        padding: 10px;
+        margin: 5px;
+    }
+    .side {
+        margin:5px;
+    }
+    .player-box {
+        height: 300px;
+        overflow-y: scroll;
+        border-width : 1px;
+        border-style: solid;
+        border-color: black;
+    }
+    .console-box {
+        height: 300px;
+        overflow-y: scroll;
+        border-width : 1px;
+        border-style: solid;
+        border-color: black;
+        padding: 5px;
+        font-size: 12px;
+    }
+    .header {
+        height: 50px;
+    }
+    .square {
+        width: 30px;
+        height: 30px;
+        border-width: 2px;
+        border-color: black;
+        border-style: solid;
+        float: left;
+        margin-right: 20px;
+    }
+    .playerid {
+        width: 26px;
+        height: 26px;
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .player {
+        height: 30px;
+        margin : 10px;
+    }
+    .name {
+        height: 26px;
+        width: 150px;
+        font-size: 20px;
+        float: left;
+        display: table-cell;
+        vertical-align: middle;
+    }
+    .latency {
+        height: 26px;
+        width: 75px;
+        font-size: 20px;
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .alert {
+        z-index : 3;
+    }
