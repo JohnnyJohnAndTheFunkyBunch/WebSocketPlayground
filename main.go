@@ -22,6 +22,7 @@ type Session struct {
     players map[*Player]bool
     playerCounter uint8
     content string
+    app App
 }
 
 type Msg struct {
@@ -94,13 +95,17 @@ func onMsg(conn *websocket.Conn, msg string) {
     case 6:
         player := playerMap[conn]
         session := player.session
-        players := session.players
-        for p := range players {
-            if (p.conn == conn) {
-                continue
-            }
-            p.conn.SendTextMsg(string(msg))
+        if session.app != nil {
+            session.app.OnMsg(player, msg)
         }
+
+        //players := session.players
+        //for p := range players {
+        //    if (p.conn == conn) {
+        //        continue
+        //    }
+        //    p.conn.SendTextMsg(string(msg))
+        //}
     }
 
 
@@ -109,12 +114,22 @@ func onMsg(conn *websocket.Conn, msg string) {
 func handleContentMsg(conn *websocket.Conn, msg ContentMsg) {
     player := playerMap[conn]
     session := player.session
+    appName := msg.C
     session.content = msg.C
     players := session.players
     msg.C = contentMap[msg.C]
     for p := range players {
         msgByte, _ := json.Marshal(msg)
         p.conn.SendTextMsg(string(msgByte))
+    }
+    if appName == "youtube" {
+        m := make(map[*Player]uint8)
+        // this can be made more efficient by merfing with previous loo[
+        for p := range players {
+            m[p] = 0
+        }
+        fmt.Println("session")
+        session.app = YTSyncApp{videoId:"",playerStates:m}
     }
 }
 

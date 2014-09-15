@@ -1,6 +1,6 @@
 <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
 <div class="input-group">
-    <input id="videoId" type="text" class="form-control" placeholder="Youtube URL">
+    <input id="videoId" type="text" class="form-control" placeholder="Eg: https://www.youtube.com/watch?v=9No-FiEInLA">
     <div class="input-group-btn">
         <button id="loadVideo" type="button"  class="btn btn-default">Load Video</button>
         <button id="loadVideo" type="button"  class="btn btn-default" style="margin-left:5px;">Sync</button>
@@ -68,29 +68,17 @@
           s.send(msg)
       }
   }
-  // 4. The API will call this function when the video player is ready.
-  /*
-  function onPlayerReady(event) {
-    event.target.playVideo();
-}
-*/
-
-  // 5. The API calls this function when the player's state changes.
-  //    The function indicates that when playing a video (state=1),
-  //    the player should play for six seconds and then stop.
-  /*
-  var done = false;
-  function onPlayerStateChange(event) {
-    if (event.data == YT.PlayerState.PLAYING && !done) {
-      setTimeout(stopVideo, 6000);
-      done = true;
-    }
-  }*/
    
   videoButton.click(function () {
-      loadVideoById(parseURL(videoInput.val()));
+      if (videoInput.val() == "") {
+          loadVideoById(parseURL(videoInput.attr('placeholder')));
+      }
+      else {
+          loadVideoById(parseURL(videoInput.val()));
+      }
       // send youtube link to everyone (change video)
   });
+
   function playVideo() {
       player.playVideo();
   } 
@@ -128,6 +116,7 @@
       }
   }
   function parseURL(url) {
+      console.log(url);
       var n = url.indexOf("watch?v=");
       var code;
       if (n != -1) {
