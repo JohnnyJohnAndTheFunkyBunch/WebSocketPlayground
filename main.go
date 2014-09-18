@@ -22,13 +22,16 @@ type Session struct {
     players map[*Player]bool
     playerCounter uint8
     content string
+    recycleId map[uint8]bool
     app App
 }
 
 type Msg struct {
     P uint8 // player id
     T uint8 // type
+    M interface{}
 }
+
 
 var sessionMap map[string]*Session
 var playerMap map[*websocket.Conn]*Player
@@ -58,13 +61,18 @@ func onDisconnected(conn *websocket.Conn) {
         repInit := Msg{P:player.id,T:1}
         repByte, _ := json.Marshal(repInit)
         session := player.session
+        if session.app != nil {
+            session.app.OnDisconnected(player)
+        }
         for p := range session.players {
             if p.conn == conn {
                 continue
             }
             p.conn.SendTextMsg(string(repByte))
         }
+        session.recycleId[player.id] = true
         delete(session.players, player)
+        session.playerCounter -= 1
     }
     // have a stack of reusable player id
     // send message to session saying disconnected, find session
@@ -75,7 +83,7 @@ func onMsg(conn *websocket.Conn, msg string) {
     err := json.Unmarshal([]byte(msg), &m)
     if err != nil {
         fmt.Println("Error in JSON", err.Error())
-        return;
+        return
     }
     switch m.T {
     case 0:
@@ -107,8 +115,17 @@ func onMsg(conn *websocket.Conn, msg string) {
         //    p.conn.SendTextMsg(string(msg))
         //}
     }
+}
 
-
+func onPong(conn *websocket.Conn) {
+    player := playerMap[conn]
+    session := player.session
+    players := session.players
+    msg := LatencyMsg{player.id, 4, int64(player.conn.Latency())}
+    msgByte, _ := json.Marshal(msg)
+    for p := range players {
+        p.conn.SendTextMsg(string(msgByte))
+    }
 }
 
 func handleContentMsg(conn *websocket.Conn, msg ContentMsg) {
@@ -123,13 +140,15 @@ func handleContentMsg(conn *websocket.Conn, msg ContentMsg) {
         p.conn.SendTextMsg(string(msgByte))
     }
     if appName == "youtube" {
-        m := make(map[*Player]uint8)
+        m := make(map[*Player]int8)
+        t := make(map[*Player]float64)
+        v := make(map[*Player]string)
         // this can be made more efficient by merfing with previous loo[
         for p := range players {
             m[p] = 0
         }
         fmt.Println("session")
-        session.app = YTSyncApp{videoId:"",playerStates:m}
+        session.app = &YTSyncApp{videoId:"",playerStates:m,playerTimes:t,playerVideo:v}
     }
 }
 
@@ -142,15 +161,34 @@ func handleStartMsg(conn *websocket.Conn, sessionId string) {
         // insert player
         if player != nil {
             player.session = session
-            player.id = session.playerCounter
+            // pop some id
+            if len(session.recycleId) == 0 {
+                player.id = session.playerCounter
+            } else {
+                for k, _ := range session.recycleId {
+                    player.id = k
+                    break
+                }
+                delete(session.recycleId, player.id)
+            }
             player.username = "Player" + strconv.Itoa(int(player.id))
             session.players[player] = true
             session.playerCounter += 1
+            if session.app != nil {
+                session.app.OnConnected(player)
+            }
         }
     } else {
         fmt.Println("Creating session")
         newPlayerMap := make(map[*Player]bool)
-        session = &Session{id:sessionId,players:newPlayerMap,playerCounter:0,content:"main"}
+        newRecycleId := make(map[uint8]bool)
+        session = &Session{
+            id:sessionId,
+            players:newPlayerMap,
+            playerCounter:0,
+            content:"main",
+            recycleId:newRecycleId,
+        }
         sessionMap[sessionId] = session
         // insert player
         if player != nil {
@@ -196,16 +234,6 @@ func handleEventMsg(conn *websocket.Conn, msg string) {
 func handleDisconnectMsg(conn *websocket.Conn) {
 }
 
-func onPong(conn *websocket.Conn) {
-    player := playerMap[conn]
-    session := player.session
-    players := session.players
-    msg := LatencyMsg{player.id, 4, int64(player.conn.Latency())}
-    msgByte, _ := json.Marshal(msg)
-    for p := range players {
-        p.conn.SendTextMsg(string(msgByte))
-    }
-}
 
 func initWebSocket() {
 	logger := log.New(os.Stdout, "websocket: ", log.Ltime)

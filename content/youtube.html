@@ -16,6 +16,7 @@
   var videoInput = $('#videoId');
   var currentTime;
   var currentVideoId;
+  var previousState = 0;
 
   tag.src = "https://www.youtube.com/iframe_api";
   var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -39,42 +40,43 @@
   function onPlayerStateChange(event) {
       var state = event.data;
       var msg = "";
+      console.log(event.data);
       currentTime = Math.round(player.getCurrentTime()*100)/100;
       if (state == -1) { // playe
           console.log(parseURL(player.getVideoUrl()));
           msg = '{"P":'+playerId+',"T":6,"M":{"T":-1,"M":"'+parseURL(player.getVideoUrl())+'"}}';
-          //msg = '{"P":'+playerId+',"T":6,"M":{"T":-1,"M":"'+player.getVideoURL()+'"}}';
       }
       else if (state == 0) {
-          msg = '{"P":'+playerId+',"T":6,"M":{"T":0}}';
+          msg = '{"P":'+playerId+',"T":6,"M":{"T":0,"M":'+currentTime+'}}';
       }
       else if (state == 1) {
-          msg = '{"P":'+playerId+',"T":6,"M":{"T":1}}';
+          msg = '{"P":'+playerId+',"T":6,"M":{"T":1,"M":'+currentTime+'}}';
+          if (previousState == 3 || previousState == -1) {
+              player.pauseVideo();
+          }
       }
       else if (state == 2) {
           msg = '{"P":'+playerId+',"T":6,"M":{"T":2,"M":'+currentTime+'}}';
-          seekTo(currentTime);
       }
       else if (state == 3) {
-          if (currentTime != 0) {
-              msg = '{"P":'+playerId+',"T":6,"M":{"T":3,"M":'+currentTime+'}}';
-              seekTo(currentTime);
-          }
+          msg = '{"P":'+playerId+',"T":6,"M":{"T":3,"M":'+currentTime+'}}';
       }
       else if (state == 5) {
-          msg = '{"P":'+playerId+',"T":6,"M":{"T":4}}';
+          msg = '{"P":'+playerId+',"T":6,"M":{"T":5,"M":'+currentTime+'}}';
       }
       if (msg != ""){
           s.send(msg)
       }
+      previousState = event.data;
   }
    
   videoButton.click(function () {
       if (videoInput.val() == "") {
-          loadVideoById(parseURL(videoInput.attr('placeholder')));
+          loadVideoById('zqKovGMx9xo')
       }
       else {
-          loadVideoById(parseURL(videoInput.val()));
+          var id = parseURL(videoInput.val());
+          loadVideoById(id);
       }
       // send youtube link to everyone (change video)
   });
@@ -90,8 +92,8 @@
       currentTime = player.getCurrentTime();
   }
   function seekTo(time) {
-      player.pauseVideo();
       player.seekTo(time, true);
+      player.pauseVideo();
   }
   function loadVideoById(id) {
       if (id == currentVideoId && player != null) {
@@ -118,7 +120,7 @@
   function parseURL(url) {
       console.log(url);
       var n = url.indexOf("watch?v=");
-      var code;
+      var code = "";
       if (n != -1) {
           code = url.substr(n + 8);
       }
@@ -127,9 +129,6 @@
           if (n != -1) {
               code = url.substr(n + 9);
           }
-          else {
-              code = url;
-          }
       }
       return code;
   }
@@ -137,23 +136,28 @@
   function onApplicationMsg(obj) {
       var ytobj = obj.M;
       console.log(obj);
-      if (ytobj.T == -1) { // playe
-          loadVideoById(ytobj.M);
-      }
-      else if (ytobj.T == 0) {
-      }
-      else if (ytobj.T == 1) {
-          if (player.getPlayerState() != 1) {
+      var playerId = obj.P
+      if (playerId == -1) {
+          if (ytobj.T == -1) { // playe
+              loadVideoById(ytobj.M);
+          }
+          else if (ytobj.T == 0) {
+              stopVideo();
+          }
+          else if (ytobj.T == 1) {
+              console.log("PLAYVIDEO")
               playVideo();
           }
-      }
-      else if (ytobj.T == 2) {
-          seekTo(ytobj.M);
-      }
-      else if (ytobj.T == 3) {
-          seekTo(ytobj.M);
-      }
-      else if (ytobj.T == 5) {
+          else if (ytobj.T == 2) {
+              pauseVideo();
+          }
+          else if (ytobj.T == 3) {
+          }
+          else if (ytobj.T == 4) {
+              seekTo(ytobj.M);
+          }
+          else if (ytobj.T == 5) {
+          }
       }
   }
 
