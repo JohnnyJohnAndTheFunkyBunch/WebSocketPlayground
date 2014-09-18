@@ -2,7 +2,7 @@
     var playerBox = $('.player-box');
     var consoleBox = $('.console-box');
     var contentBox = $('.content');
-    var host = "ws://localhost:8000";
+    var host = "ws://54.68.97.177:8000";
     var idMsg = "{\"T\":0,\"M\":\""+session+"\"}";
     var playerId;
     console.log(idMsg);

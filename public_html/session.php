@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="col-md-4"></div> 
-            <div class="col-md-4">Link: http://example.com/G3If3fPq350k/</div>
+            <div class="col-md-4">Link: http://jonathan.ma/session.php?s=<?php echo $_GET['s']?></div>
         </div>
     </div>
     <div class="container-fluid main">

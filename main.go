@@ -72,6 +72,9 @@ func onDisconnected(conn *websocket.Conn) {
         }
         session.recycleId[player.id] = true
         delete(session.players, player)
+        if len(session.players) == 0 {
+            delete(sessionMap,session.id)
+        }
         session.playerCounter -= 1
     }
     // have a stack of reusable player id
