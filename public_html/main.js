@@ -25,7 +25,6 @@
     };
     
     s.onmessage = function (e) {
-        console.log(e.data);
         var obj = JSON.parse(e.data);
         var type = obj.T;
         if (type == 0) {
