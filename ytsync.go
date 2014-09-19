@@ -173,6 +173,9 @@ func (app *YTSyncApp) OnMsg(player *Player, msg string) {
     for k, v := range app.playerStates {
         fmt.Print("P:",k.id," S:", v,"|")
     }
+    for p := range players {
+        p.conn.SendTextMsg(string(msg))
+    }
     fmt.Print("\n")
     fmt.Println("Buffer: ",app.buffering)
 }

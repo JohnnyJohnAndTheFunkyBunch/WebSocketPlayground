@@ -109,21 +109,22 @@ func onMsg(conn *websocket.Conn, msg string) {
         if session.app != nil {
             session.app.OnMsg(player, msg)
         }
-
-        //players := session.players
-        //for p := range players {
-        //    if (p.conn == conn) {
-        //        continue
-        //    }
-        //    p.conn.SendTextMsg(string(msg))
-        //}
     }
 }
 
 func onPong(conn *websocket.Conn) {
     player := playerMap[conn]
+    if player == nil {
+        return
+    }
     session := player.session
+    if session == nil {
+        return
+    }
     players := session.players
+    if players == nil {
+        return
+    }
     msg := LatencyMsg{player.id, 4, int64(player.conn.Latency())}
     msgByte, _ := json.Marshal(msg)
     for p := range players {
@@ -152,6 +153,16 @@ func handleContentMsg(conn *websocket.Conn, msg ContentMsg) {
         }
         fmt.Println("session")
         session.app = &YTSyncApp{videoId:"",playerStates:m,playerTimes:t,playerVideo:v}
+    } else if appName == "youtube2" {
+        m := make(map[*Player]int8)
+        t := make(map[*Player]float64)
+        v := make(map[*Player]string)
+        // this can be made more efficient by merfing with previous loo[
+        for p := range players {
+            m[p] = 0
+        }
+        fmt.Println("session")
+        session.app = &YTSyncApp2{videoId:"",playerStates:m,playerTimes:t,playerVideo:v}
     }
 }
 
@@ -240,7 +251,7 @@ func handleDisconnectMsg(conn *websocket.Conn) {
 
 func initWebSocket() {
 	logger := log.New(os.Stdout, "websocket: ", log.Ltime)
-	ws := websocket.CreateServer("localhost", "8000", logger)
+	ws := websocket.CreateServer("0.0.0.0", "8000", logger)
 	ws.HandleConnected(onConnected)
 	ws.HandleDisconnected(onDisconnected)
 	ws.HandleTextMsg(onMsg)
@@ -257,7 +268,12 @@ func loadFiles() {
     if err != nil {
         panic("Can't load files")
     }
+    youtube2, err := ioutil.ReadFile("content/youtube2.html")
+    if err != nil {
+        panic("Can't load files")
+    }
     contentMap["youtube"] = string(youtube)
+    contentMap["youtube2"] = string(youtube2)
     contentMap["main"] = string(main)
 }
 

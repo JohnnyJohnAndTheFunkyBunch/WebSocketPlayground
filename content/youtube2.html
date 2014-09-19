@@ -8,15 +8,28 @@
 </div>
 <br>
 <div id="player"></div>
+<div class="btn-group" style="float:left;margin-right:5px;">
+    <button id="playVideo" type="button" class="btn btn-default"><span class="glyphicon glyphicon-play"></span></button>
+    <button id="pauseVideo" type="button" class="btn btn-default"><span class="glyphicon glyphicon-pause"></span></button>
+</div>
+<div class="progress" style="margin-top:7px;">
+    <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+    </div>
+</div>
 
 <script>
   // 2. This code loads the IFrame Player API code asynchronously.
   var tag = document.createElement('script');
-  var videoButton = $('#loadVideo');
+  var loadButton = $('#loadVideo');
+  var playButton = $('#playVideo');
+  var pauseButton = $('#pauseVideo');
+  var progressBar = $('.progress-bar');
   var videoInput = $('#videoId');
   var currentTime;
+  var videoLength;
   var currentVideoId;
   var previousState = 0;
+  var loading = false;
 
   tag.src = "http://www.youtube.com/iframe_api";
   var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -27,15 +40,15 @@
   var player = null;
   function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
-      height: '520',
-      width: '878',
+      height: '480',
+      width: '854',
       videoId: '',
       events: {
         //'onReady': onPlayerReady
         'onStateChange': onPlayerStateChange
       },
       playerVars: {
-        'controls':1, 
+        'controls':0, 
       }
     });
   }
@@ -43,47 +56,81 @@
   function onPlayerStateChange(event) {
       var state = event.data;
       var msg = "";
-      console.log(event.data);
-      currentTime = Math.round(player.getCurrentTime()*100)/100;
+      currentTime = player.getCurrentTime();
       if (state == -1) { // playe
-          console.log(parseURL(player.getVideoUrl()));
-          msg = '{"P":'+playerId+',"T":6,"M":{"T":-1,"M":"'+parseURL(player.getVideoUrl())+'"}}';
+          loading = true
+          playVideo();
       }
       else if (state == 0) {
-          msg = '{"P":'+playerId+',"T":6,"M":{"T":0,"M":'+currentTime+'}}';
+          sendStateInfo(state,currentTime);
       }
       else if (state == 1) {
-          msg = '{"P":'+playerId+',"T":6,"M":{"T":1,"M":'+currentTime+'}}';
-          if (previousState == 3 || previousState == -1) {
-              player.pauseVideo();
+          videoLength = player.getDuration();
+          if (loading) {
+              pauseVideo();
+              loading = false
           }
       }
       else if (state == 2) {
-          msg = '{"P":'+playerId+',"T":6,"M":{"T":2,"M":'+currentTime+'}}';
+          sendStateInfo(state,currentTime);
       }
       else if (state == 3) {
-          msg = '{"P":'+playerId+',"T":6,"M":{"T":3,"M":'+currentTime+'}}';
+          sendStateInfo(state,currentTime);
+          if (!loading) {
+              pauseVideo();
+          }
       }
       else if (state == 5) {
-          msg = '{"P":'+playerId+',"T":6,"M":{"T":5,"M":'+currentTime+'}}';
+          sendStateInfo(state,currentTime);
       }
-      if (msg != ""){
-          s.send(msg)
-      }
-      previousState = event.data;
   }
-   
-  videoButton.click(function () {
+
+  playButton.click(function () {
+      if (player == null) {
+          return;
+      }
+      sendPlayRequest(player.getCurrentTime());
+  });
+
+  pauseButton.click(function () {
+      if (player == null) {
+          return;
+      }
+      sendPauseRequest(player.getCurrentTime());
+  });
+
+  loadButton.click(function () {
       if (videoInput.val() == "") {
-          loadVideoById('zqKovGMx9xo')
+          sendLoadingRequest('zqKovGMx9xo')
       }
       else {
           var id = parseURL(videoInput.val());
-          loadVideoById(id);
+          sendLoadingRequest(id);
       }
       // send youtube link to everyone (change video)
   });
 
+  function sendPlayRequest(time) {
+      msg = '{"P":'+playerId+',"T":6,"M":{"T":1,"M":'+time+'}}';
+      s.send(msg);
+  }
+  function sendPauseRequest(time) {
+      msg = '{"P":'+playerId+',"T":6,"M":{"T":2,"M":'+time+'}}';
+      s.send(msg);
+  }
+  function sendBufferingRequest(time) {
+      msg = '{"P":'+playerId+',"T":6,"M":{"T":3,"M":'+time+'}}';
+      s.send(msg);
+  }
+  function sendLoadingRequest(videoId) {
+      msg = '{"P":'+playerId+',"T":6,"M":{"T":-1,"M":"'+videoId+'"}}';
+      s.send(msg);
+  }
+  function sendStateInfo(state, time) {
+      msg = '{"P":'+playerId+',"T":6,"M":{"T":4,"M":"'+state+':'+time+'"}}';
+      s.send(msg);
+  }
+    
   function playVideo() {
       player.playVideo();
   } 
@@ -92,36 +139,38 @@
   }
   function pauseVideo() {
       player.pauseVideo();
-      currentTime = player.getCurrentTime();
   }
   function seekTo(time) {
       player.seekTo(time, true);
       player.pauseVideo();
   }
   function loadVideoById(id) {
+      loading = true;
       if (id == currentVideoId && player != null) {
           return;
       }
       currentVideoId = id;
       if (player == null ) {
-    player = new YT.Player('player', {
-      height: '520',
-      width: '878',
-      videoId: '',
-      events: {
-          'onReady': (function () {
-              player.loadVideoById(id)
-          }),
-        'onStateChange': onPlayerStateChange
-      }
-  });
+        player = new YT.Player('player', {
+          height: '480',
+          width: '854',
+          videoId: '',
+          events: {
+              'onReady': (function () {
+                  player.loadVideoById(id)
+              }),
+            'onStateChange': onPlayerStateChange
+          },
+          playerVars: {
+            'controls':0, 
+          }
+        });
       }
       else {
           player.loadVideoById(id);
       }
   }
   function parseURL(url) {
-      console.log(url);
       var n = url.indexOf("watch?v=");
       var code = "";
       if (n != -1) {
@@ -138,9 +187,9 @@
 
   function onApplicationMsg(obj) {
       var ytobj = obj.M;
-      console.log(obj);
       var playerId = obj.P
       if (playerId == -1) {
+          console.log(ytobj.T.toString())
           if (ytobj.T == -1) { // playe
               loadVideoById(ytobj.M);
           }
@@ -148,11 +197,10 @@
               stopVideo();
           }
           else if (ytobj.T == 1) {
-              console.log("PLAYVIDEO")
               playVideo();
           }
           else if (ytobj.T == 2) {
-              pauseVideo();
+              seekTo(ytobj.M);
           }
           else if (ytobj.T == 3) {
           }
@@ -184,7 +232,16 @@
           }
       }
   }
-
+  function progressBarLoop () {
+    setInterval(function(){
+        if (player == null || progressBar == null) {
+            return; 
+        } 
+        var fraction = player.getCurrentTime()/player.getDuration()*100;
+        console.log(fraction);
+        progressBar.css("width", fraction.toString() + "%");
+    }, 500);
+  }
   // NOTE JONATHAN ::: when change video, state changed to -1, update the 
   // video by taking videoID
   // when buffering, pause video, to wait for others, sync
