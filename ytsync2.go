@@ -102,7 +102,12 @@ func (app *YTSyncApp2) OnMsg(player *Player, msg string) {
         stateMsgArray := strings.Split(stateMsg, ":")
         state, err := strconv.ParseInt(stateMsgArray[0], 0, 8)
         time, err2 := strconv.ParseFloat(stateMsgArray[1], 64)
-        if err != nil || err2 != nil {
+        if err != nil {
+            fmt.Println("Error:",err.Error())
+            break
+        }
+        if err2 != nil {
+            fmt.Println("Error:",err2.Error())
             break
         }
         app.handleStateInfo(player, session, int8(state), time)

@@ -56,6 +56,7 @@
   }
     
   function onPlayerStateChange(event) {
+      console.log("State: " + event.data.toString());
       var state = event.data;
       var msg = "";
       currentTime = player.getCurrentTime();
@@ -67,6 +68,7 @@
           sendStateInfo(state,currentTime);
       }
       else if (state == 1) {
+          sendStateInfo(state,currentTime);
           videoLength = player.getDuration();
           if (loading) {
               seekTo(0);
