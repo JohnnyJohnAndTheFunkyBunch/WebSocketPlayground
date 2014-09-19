@@ -8,14 +8,14 @@
 </div>
 <br>
 <div id="player"></div>
-<div class="btn-group" style="float:left;margin-right:5px;">
+<div class="btn-group" style="float:left;">
     <button id="playVideo" type="button" class="btn btn-default"><span class="glyphicon glyphicon-play"></span></button>
     <button id="pauseVideo" type="button" class="btn btn-default"><span class="glyphicon glyphicon-pause"></span></button>
 </div>
-<div class="progress" style="margin-top:7px;">
-    <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+    <div class="myprogress" style="float:right;height:34px;margin-right:30px;width:765px;">
+        <div id="line" style="border-style:solid;border-width:1px;top:50%;position:relative;"></div>
+        <div id="square" style="border-width:2px;width:15px;height:15px;border-style:solid;position:relative;top:8.5px;left:0%"></div>
     </div>
-</div>
 
 <script>
   // 2. This code loads the IFrame Player API code asynchronously.
@@ -24,7 +24,8 @@
   var syncButton = $('#syncVideo');
   var playButton = $('#playVideo');
   var pauseButton = $('#pauseVideo');
-  var progressBar = $('.progress-bar');
+  var progressBar = $('.myprogress');
+  var progressSquare = $('#square');
   var videoInput = $('#videoId');
   var currentTime;
   var videoLength;
@@ -45,7 +46,7 @@
       width: '854',
       videoId: '',
       events: {
-        //'onReady': onPlayerReady
+        'onReady': progressBarLoop,
         'onStateChange': onPlayerStateChange
       },
       playerVars: {
@@ -85,6 +86,7 @@
           sendStateInfo(state,currentTime);
       }
   }
+    
 
   playButton.click(function () {
       if (player == null) {
@@ -152,6 +154,7 @@
       player.pauseVideo();
   }
   function seekTo(time) {
+      player.seekTo(time, true);
       player.pauseVideo();
   }
   function loadVideoById(id) {
@@ -168,6 +171,7 @@
           events: {
               'onReady': (function () {
                   player.loadVideoById(id)
+                  progressBarLoop()
               }),
             'onStateChange': onPlayerStateChange
           },
@@ -246,14 +250,19 @@
       }
   }
   function progressBarLoop () {
+      progressBar.click(function(event) {
+          // send seek request
+          var divOffset = $(this).offset();
+          sendSyncRequest((event.pageX - divOffset.left)/765*videoLength);
+          //
+      });
     setInterval(function(){
         if (player == null || progressBar == null) {
             return; 
         } 
         var fraction = player.getCurrentTime()/player.getDuration()*100;
-        console.log(fraction);
-        progressBar.css("width", fraction.toString() + "%");
-    }, 500);
+        progressSquare.css("left", fraction.toString() + "%");
+    }, 200);
   }
   // NOTE JONATHAN ::: when change video, state changed to -1, update the 
   // video by taking videoID
