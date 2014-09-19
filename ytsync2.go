@@ -73,7 +73,7 @@ func (app *YTSyncApp2) OnMsg(player *Player, msg string) {
         }
         // check if everyone gucci, aka not 3
         for _, v := range app.playerStates {
-            if v == 3 {
+            if v == 3 || v == -1 {
                 app.playBuffer = true
                 break S
             }
