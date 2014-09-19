@@ -241,6 +241,9 @@
           }
           else if (ytobj.T == 5) {
           }
+          else if (ytobj.T == 6) {
+              addMessage("Player" + playerId + " synced video at " + Math.round(ytobj.M).toString().toHHMMSS(), colors[playerId%10])
+          }
       }
   }
   function progressBarLoop () {
