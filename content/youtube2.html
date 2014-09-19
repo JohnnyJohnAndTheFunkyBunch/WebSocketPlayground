@@ -60,15 +60,14 @@
       var state = event.data;
       var msg = "";
       currentTime = player.getCurrentTime();
+      sendStateInfo(state,currentTime);
       if (state == -1) { // playe
           loading = true
           playVideo();
       }
       else if (state == 0) {
-          sendStateInfo(state,currentTime);
       }
       else if (state == 1) {
-          sendStateInfo(state,currentTime);
           videoLength = player.getDuration();
           if (loading) {
               seekTo(0);
@@ -76,16 +75,13 @@
           }
       }
       else if (state == 2) {
-          sendStateInfo(state,currentTime);
       }
       else if (state == 3) {
-          sendStateInfo(state,currentTime);
           if (!loading) {
               pauseVideo();
           }
       }
       else if (state == 5) {
-          sendStateInfo(state,currentTime);
       }
   }
     
