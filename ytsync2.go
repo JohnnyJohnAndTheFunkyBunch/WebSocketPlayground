@@ -176,8 +176,15 @@ func (app *YTSyncApp2) handleStateInfo(player *Player, session *Session, state i
     app.playerStates[player] = state
     switch state {
     case -1:
+        app.buffering = true
     case 0:
     case 1:
+        for _, s := range app.playerStates {
+            if s == 3 || s == -1 {
+                return
+            }
+        }
+        app.buffering = false
     case 2:
         fmt.Println(app.buffering, app.playBuffer)
         if app.buffering && app.playBuffer{
