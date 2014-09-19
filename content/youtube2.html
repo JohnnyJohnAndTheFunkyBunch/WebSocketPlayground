@@ -68,7 +68,7 @@
       else if (state == 1) {
           videoLength = player.getDuration();
           if (loading) {
-              pauseVideo();
+              seekTo(0);
               loading = false
           }
       }
