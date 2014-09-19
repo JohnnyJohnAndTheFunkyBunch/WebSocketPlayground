@@ -152,8 +152,8 @@
       player.pauseVideo();
   }
   function seekTo(time) {
-      player.pauseVideo();
       player.seekTo(time, true);
+      player.pauseVideo();
   }
   function loadVideoById(id) {
       loading = true;
