@@ -123,6 +123,15 @@ func (app *YTSyncApp2) OnMsg(player *Player, msg string) {
             }
         } */
     case 5:
+    case 6:
+        time, ok := ytmsg.M.(float64)
+        if !ok {
+            break
+        }
+        app.playBuffer = true
+        for p := range players {
+            app.sendPause(p, time)
+        }
     }
     for k, v := range app.playerStates {
         fmt.Print("P:",k.id," S:", v,"|")

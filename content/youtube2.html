@@ -3,7 +3,7 @@
     <input id="videoId" type="text" class="form-control" placeholder="Eg: https://www.youtube.com/watch?v=9No-FiEInLA">
     <div class="input-group-btn">
         <button id="loadVideo" type="button"  class="btn btn-default">Load Video</button>
-        <button id="loadVideo" type="button"  class="btn btn-default" style="margin-left:5px;">Sync</button>
+        <button id="syncVideo" type="button"  class="btn btn-default" style="margin-left:5px;">Sync</button>
     </div>
 </div>
 <br>
@@ -21,6 +21,7 @@
   // 2. This code loads the IFrame Player API code asynchronously.
   var tag = document.createElement('script');
   var loadButton = $('#loadVideo');
+  var syncButton = $('#syncVideo');
   var playButton = $('#playVideo');
   var pauseButton = $('#pauseVideo');
   var progressBar = $('.progress-bar');
@@ -98,6 +99,12 @@
       }
       sendPauseRequest(player.getCurrentTime());
   });
+  syncButton.click(function () {
+      if (player == null) {
+          return;
+      }
+      sendSyncRequest(player.getCurrentTime());
+  });
 
   loadButton.click(function () {
       if (videoInput.val() == "") {
@@ -120,6 +127,10 @@
   }
   function sendBufferingRequest(time) {
       msg = '{"P":'+playerId+',"T":6,"M":{"T":3,"M":'+time+'}}';
+      s.send(msg);
+  }
+  function sendSyncRequest(time) {
+      msg = '{"P":'+playerId+',"T":6,"M":{"T":6,"M":'+time+'}}';
       s.send(msg);
   }
   function sendLoadingRequest(videoId) {
