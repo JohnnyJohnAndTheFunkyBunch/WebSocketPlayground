@@ -32,6 +32,7 @@
   var currentVideoId;
   var previousState = 0;
   var loading = false;
+  var pauseBuffer = false;
 
   tag.src = "http://www.youtube.com/iframe_api";
   var firstScriptTag = document.getElementsByTagName('script')[0];

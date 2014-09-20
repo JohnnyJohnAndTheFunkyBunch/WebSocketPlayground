@@ -145,7 +145,6 @@ func (app *YTSyncApp2) OnMsg(player *Player, msg string) {
         p.conn.SendTextMsg(string(msg))
     }
     fmt.Print("\n")
-    fmt.Println("Buffer: ",app.buffering)
 }
 
 
@@ -185,8 +184,8 @@ func (app *YTSyncApp2) handleStateInfo(player *Player, session *Session, state i
             }
         }
         app.buffering = false
+        app.loading = false
     case 2:
-        fmt.Println(app.buffering, app.playBuffer)
         if app.buffering && app.playBuffer{
             for _, s := range app.playerStates {
                 if s == 3 || s == -1 {
@@ -207,4 +206,5 @@ func (app *YTSyncApp2) handleStateInfo(player *Player, session *Session, state i
         }
     case 5:
     }
+    fmt.Println("Buffer:",app.buffering,"PlayBuffer", app.playBuffer)
 }
